@@ -14,7 +14,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import com.example.sunshineweather.logic.dao.Repository
 import com.example.sunshineweather.logic.model.RealTimeWeather
-import com.example.sunshineweather.logic.model.RequestResult
 import com.example.sunshineweather.logic.network.WeatherService
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
@@ -30,17 +29,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        refresh_button.setOnClickListener {
-            val rtw = Repository.refreshWeather(121.622816,31.355535){
-                if(it!=null)
-                    showRTWeather(it)
-            }
-            showRTWeather(rtw)
+        query_button.setOnClickListener {
+            val intent = Intent(this, WeatherActivity::class.java)
+            intent.putExtra("city",city_edit.text.toString())
+            startActivity(intent)
         }
     }
 
-    fun showRTWeather(rtWeather: RealTimeWeather){
-        text_view.text = rtWeather.skycon
-    }
+
 
 }

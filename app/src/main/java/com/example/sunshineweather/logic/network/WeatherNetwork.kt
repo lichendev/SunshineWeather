@@ -1,7 +1,7 @@
 package com.example.sunshineweather.logic.network
 
 import com.example.sunshineweather.SunnyWeatherApplication
-import com.example.sunshineweather.logic.model.RequestResult
+import com.example.sunshineweather.logic.model.RTWeaResResult
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -10,32 +10,32 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object WeatherNetwork {
     private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(SunnyWeatherApplication.BASEURL)
+        .baseUrl(SunnyWeatherApplication.WeatherBaseURL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
     private val weatherService = retrofit.create(WeatherService::class.java)
 
     fun getRealTimeWeather(longitude: Double, latitude: Double, callback:
-        (Call<RequestResult>, Response<RequestResult>)->Unit){
-        weatherService.getRealTimeWeather(SunnyWeatherApplication.TOKEN, longitude, latitude).enqueue(
-            object : Callback<RequestResult>{
+        (Call<RTWeaResResult>, Response<RTWeaResResult>)->Unit){
+        weatherService.getRealTimeWeather(SunnyWeatherApplication.WeatherTOKEN, longitude, latitude).enqueue(
+            object : Callback<RTWeaResResult>{
                 override fun onResponse(
-                    call: Call<RequestResult>,
-                    response: Response<RequestResult>
+                    call: Call<RTWeaResResult>,
+                    response: Response<RTWeaResResult>
                 ) {
                     callback(call,response)
                 }
 
-                override fun onFailure(call: Call<RequestResult>, t: Throwable) {
+                override fun onFailure(call: Call<RTWeaResResult>, t: Throwable) {
                     t.printStackTrace()
                 }
             }
         )
     }
 
-    fun getRealTimeWeather(longitude: Double, latitude: Double): RequestResult? {
+    fun getRealTimeWeather(longitude: Double, latitude: Double): RTWeaResResult? {
         val response =
-            weatherService.getRealTimeWeather(SunnyWeatherApplication.TOKEN, longitude, latitude)
+            weatherService.getRealTimeWeather(SunnyWeatherApplication.WeatherTOKEN, longitude, latitude)
                 .execute()
         return response.body()
     }

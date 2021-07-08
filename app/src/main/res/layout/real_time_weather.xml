@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_clear_day"
+    android:id="@+id/real_time_weather">
+
+    <TextView
+        android:id="@+id/city_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:text="@string/none"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tempe_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="160dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginRight="48dp"
+        android:text="@string/none"
+        android:textColor="@color/white"
+        android:textSize="48sp"
+        app:layout_constraintEnd_toEndOf="@+id/city_text"
+        app:layout_constraintStart_toStartOf="@+id/city_text"
+        app:layout_constraintTop_toBottomOf="@+id/city_text" />
+
+    <TextView
+        android:id="@+id/tempe_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:text="@string/celsius"
+        android:textColor="@color/white"
+        android:textSize="48sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tempe_text"
+        app:layout_constraintStart_toEndOf="@+id/tempe_text"
+        app:layout_constraintTop_toTopOf="@+id/tempe_text" />
+
+    <TextView
+        android:id="@+id/weath_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/none"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/city_text"
+        app:layout_constraintStart_toStartOf="@+id/city_text"
+        app:layout_constraintTop_toBottomOf="@+id/tempe_text" />
+
+    <TextView
+        android:id="@+id/aqi_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginLeft="64dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/none"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/weath_text"
+        app:layout_constraintStart_toStartOf="@+id/weath_text"
+        app:layout_constraintTop_toBottomOf="@+id/weath_text" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:text="@string/aqi"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/aqi_text"
+        app:layout_constraintTop_toTopOf="@+id/aqi_text" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

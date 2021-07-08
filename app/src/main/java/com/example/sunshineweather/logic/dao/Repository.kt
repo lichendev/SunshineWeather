@@ -2,7 +2,9 @@ package com.example.sunshineweather.logic.dao
 
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sunshineweather.SunnyWeatherApplication
+import com.example.sunshineweather.logic.model.Location
 import com.example.sunshineweather.logic.model.RealTimeWeather
+import com.example.sunshineweather.logic.network.CityNetwork
 import com.example.sunshineweather.logic.network.WeatherNetwork
 import com.google.gson.Gson
 import java.io.*
@@ -23,6 +25,16 @@ object Repository {
             }
         }
         return rtWeather
+    }
+
+    fun getCityLocation(city: String, callback: (Location?)->Unit){
+        CityNetwork.getCityLocation(city){call,response->
+            val cityResponseResult = response.body()
+            var location: Location? = null
+            if(cityResponseResult!=null && cityResponseResult.geocodes.size > 0)
+                location = Location.parseLocation(cityResponseResult.geocodes[0].location)
+            callback(location)
+        }
     }
 
     private fun loadRTWeatherFromNative(): RealTimeWeather{
