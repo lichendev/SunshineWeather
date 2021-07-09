@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_clear_day"
-    android:id="@+id/real_time_weather">
+    >
 
     <TextView
         android:id="@+id/city_text"
@@ -77,9 +77,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
         android:layout_marginRight="5dp"
+        android:layout_marginBottom="319dp"
         android:text="@string/aqi"
         android:textColor="@color/white"
         android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/aqi_text"
         app:layout_constraintTop_toTopOf="@+id/aqi_text" />
 

@@ -10,8 +10,8 @@ import com.example.sunshineweather.logic.network.CityNetwork
 object WeatherViewModel {
 
     //硬编码，不太好
-    val mapCodeToChinese = mapOf<String,String>("CLEAR_DAY" to "晴（白天）", "CLEAR_NIGHT" to "晴（夜间）",
-        "PARTLY_CLOUDY_DAY" to "多云（白天）","PARTLY_CLOUDY_NIGHT" to "多云（夜间）","CLOUDY" to "阴",
+    val mapCodeToChinese = mapOf<String,String>("CLEAR_DAY" to "晴", "CLEAR_NIGHT" to "晴",
+        "PARTLY_CLOUDY_DAY" to "多云","PARTLY_CLOUDY_NIGHT" to "多云","CLOUDY" to "阴",
         "LIGHT_HAZE" to "轻度雾霾",
         "MODERATE_HAZE" to "中度雾霾","HEAVY_HAZE" to "重度雾霾","LIGHT_RAIN" to "小雨","MODERATE_RAIN" to "中雨",
         "HEAVY_RAIN" to "大雨","STORM_RAIN" to "暴雨","FOG" to "雾","LIGHT_SNOW" to "小雪",
@@ -36,6 +36,26 @@ object WeatherViewModel {
             "LIGHT_RAIN","MODERATE_RAIN","HEAVY_RAIN","STORM_RAIN"->R.drawable.bg_rain
             "LIGHT_SNOW","MODERATE_SNOW","HEAVY_SNOW","STORM_SNOW"->R.drawable.bg_snow
             "WIND"->R.drawable.bg_wind
+            else->R.drawable.bg_clear_day
+        }
+    }
+
+    fun convertCodeToIcon(code: String): Int{
+        return when(code){
+            "CLEAR_DAY"-> R.drawable.ic_clear_day
+            "CLEAR_NIGHT"-> R.drawable.ic_clear_night
+            "PARTLY_CLOUDY_DAY"->R.drawable.ic_partly_cloud_day
+            "PARTLY_CLOUDY_NIGHT"->R.drawable.ic_partly_cloud_night
+            "CLOUDY"->R.drawable.ic_cloudy
+            "FOG"->R.drawable.ic_fog
+            "LIGHT_RAIN"->R.drawable.ic_light_rain
+            "MODERATE_RAIN"->R.drawable.ic_moderate_rain
+            "HEAVY_RAIN"->R.drawable.ic_heavy_rain
+            "STORM_RAIN"->R.drawable.ic_storm_rain
+            "LIGHT_SNOW"->R.drawable.ic_light_snow
+            "MODERATE_SNOW"->R.drawable.ic_moderate_snow
+            "HEAVY_SNOW"->R.drawable.ic_heavy_snow
+            "STORM_SNOW"->R.drawable.ic_heavy_snow
             else->R.drawable.bg_clear_day
         }
     }

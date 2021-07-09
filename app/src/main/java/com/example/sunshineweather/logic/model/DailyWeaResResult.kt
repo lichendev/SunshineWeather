@@ -4,9 +4,10 @@ data class DailyWeaResResult(val status: String, val result: DResult) {
     data class DResult(val daily: Dailys)
     data class Dailys(val status: String, val astro: Array<Astro>, val skycon: Array<Skycon>,
                       val temperature: Array<Temperature>)
-    data class Astro(val date:String, val sunrise:String, val sunset:String)
+    data class Astro(val date:String, val sunrise:SunriseSet, val sunset:SunriseSet)
     data class Skycon(val date: String, val value:String)
     data class Temperature(val date:String, val avg:String, val max:String, val min:String)
+    data class SunriseSet(val time: String)
 
     companion object{
         fun convertToDailyWeather(result: DailyWeaResResult): List<DailyWeather>{
