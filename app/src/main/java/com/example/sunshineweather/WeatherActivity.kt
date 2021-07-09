@@ -19,7 +19,7 @@ class WeatherActivity : AppCompatActivity() {
         var city = intent.getStringExtra("city")
         if(city==null || city.isEmpty())
             city = getString(R.string.default_city)
-        WeatherViewModel.refreshWeather(city){
+        WeatherViewModel.refreshRTWeather(city){
             if(it!=null)
                 showRTWeather(it)
         }
@@ -31,6 +31,8 @@ class WeatherActivity : AppCompatActivity() {
         weath_text.text = WeatherViewModel.convertCodeToChinese(rtWeather.skycon)
         if(rtWeather.air_quality!=null)
             aqi_text.text = rtWeather.air_quality.aqi.chn
+       // val test = WeatherViewModel.convertCodeToPhoto(rtWeather.skycon)
+        //val test2 = ContextCompat.getDrawable(this,WeatherViewModel.convertCodeToPhoto(rtWeather.skycon))
         real_time_weather.background =
             ContextCompat.getDrawable(this,WeatherViewModel.convertCodeToPhoto(rtWeather.skycon))
     }

@@ -2,17 +2,21 @@ package com.example.sunshineweather.logic.dao
 
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sunshineweather.SunnyWeatherApplication
+import com.example.sunshineweather.logic.model.DailyWeaResResult
+import com.example.sunshineweather.logic.model.DailyWeather
 import com.example.sunshineweather.logic.model.Location
 import com.example.sunshineweather.logic.model.RealTimeWeather
 import com.example.sunshineweather.logic.network.CityNetwork
 import com.example.sunshineweather.logic.network.WeatherNetwork
 import com.google.gson.Gson
+import retrofit2.Call
+import retrofit2.Response
 import java.io.*
 
 object Repository {
     private const val fileName = "real_time_weather.json"
     private val gson = Gson()
-    fun refreshWeather(longitude: Double, latitude: Double, callback: (RealTimeWeather?)->Unit): RealTimeWeather{
+    fun refreshRTWeather(longitude: Double, latitude: Double, callback: (RealTimeWeather?)->Unit): RealTimeWeather{
         val rtWeather = loadRTWeatherFromNative()
         //loadRTWeatherFromNetwork
         WeatherNetwork.getRealTimeWeather(longitude, latitude){call, response->
@@ -25,6 +29,18 @@ object Repository {
             }
         }
         return rtWeather
+    }
+
+    fun refreshDailyWeather(longitude: Double, latitude: Double, callback: (List<DailyWeather>?)->Unit){
+        WeatherNetwork.getDailyWeather(longitude,latitude){call, response ->
+            val result = response.body()
+            if(result!=null){
+                val list = DailyWeaResResult.convertToDailyWeather(result)
+                callback(list)
+            }else{
+                callback(null)
+            }
+        }
     }
 
     fun getCityLocation(city: String, callback: (Location?)->Unit){

@@ -3,6 +3,7 @@ package com.example.sunshineweather.ui.weather
 import android.util.Log
 import com.example.sunshineweather.R
 import com.example.sunshineweather.logic.dao.Repository
+import com.example.sunshineweather.logic.model.DailyWeather
 import com.example.sunshineweather.logic.model.RealTimeWeather
 import com.example.sunshineweather.logic.network.CityNetwork
 
@@ -39,13 +40,38 @@ object WeatherViewModel {
         }
     }
 
-    fun refreshWeather(city:String, callback: (RealTimeWeather?)->Unit){
+    fun refreshRTWeather(city:String, callback: (RealTimeWeather?)->Unit){
         Repository.getCityLocation(city) {
             queryCity = city
             if(it!=null){
-                 Repository.refreshWeather(it.longitude,it.latitude,callback)
+                 Repository.refreshRTWeather(it.longitude,it.latitude,callback)
             }else{
                 callback(null)
+            }
+        }
+    }
+
+    fun refreshDailyWeather(city: String, callback: (List<DailyWeather>?) -> Unit){
+        Repository.getCityLocation(city) {
+            queryCity = city
+            if(it!=null){
+                Repository.refreshDailyWeather(it.longitude,it.latitude,callback)
+            }else{
+                callback(null)
+            }
+        }
+    }
+
+    fun refRTDailyWea(city:String, callbackRT: (RealTimeWeather?)->Unit,
+                              callbackDaily: (List<DailyWeather>?) -> Unit){
+        Repository.getCityLocation(city) {
+            queryCity = city
+            if(it!=null){
+                Repository.refreshRTWeather(it.longitude,it.latitude,callbackRT)
+                Repository.refreshDailyWeather(it.longitude,it.latitude,callbackDaily)
+            }else{
+                callbackRT(null)
+                callbackDaily(null)
             }
         }
     }

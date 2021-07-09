@@ -7,4 +7,5 @@
     <string name="query_weather">查询天气</string>
     <string name="aqi">空气指数</string>
     <string name="none">none</string>
+    <string name="daily_weather_title">预报</string>
 </resources>
