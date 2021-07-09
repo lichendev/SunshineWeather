@@ -1,6 +1,8 @@
 package com.example.sunshineweather.logic.dao
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
+import com.example.sunshineweather.R
 import com.example.sunshineweather.SunnyWeatherApplication
 import com.example.sunshineweather.logic.model.DailyWeaResResult
 import com.example.sunshineweather.logic.model.DailyWeather
@@ -72,6 +74,32 @@ object Repository {
         val bufferWriter = BufferedWriter(OutputStreamWriter(fileOutput))
         bufferWriter.write(rtwJson)
         bufferWriter.close()
+    }
+
+    lateinit var cities:ArrayList<String>
+    //var city = SunnyWeatherApplication.context.getString(R.string.default_city)
+
+    fun saveCity(city: String){
+        if(!this::cities.isInitialized)
+            cities = loadSavedCities()
+        if(!cities.contains(city)){
+            cities.add(city)
+            val edit = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE).edit()
+            edit.putString("cities", gson.toJson(cities.toArray()))
+            edit.apply()
+        }
+    }
+
+    fun loadSavedCities(): ArrayList<String>{
+        if(!this::cities.isInitialized){
+            val csJson = SunnyWeatherApplication.context.getSharedPreferences("main",
+                Context.MODE_PRIVATE).getString("cities","")
+            //ArrayList<String>::class.java
+            cities = ArrayList<String>()
+            if(csJson!=null && csJson.isNotEmpty())
+                cities.addAll(gson.fromJson(csJson, Array<String>::class.java))
+        }
+        return cities
     }
 
 

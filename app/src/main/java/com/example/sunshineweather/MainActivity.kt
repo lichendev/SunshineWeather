@@ -34,8 +34,7 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("city",city_edit.text.toString())
             startActivity(intent)
         }
+
     }
-
-
 
 }

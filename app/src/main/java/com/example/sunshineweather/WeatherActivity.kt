@@ -3,12 +3,15 @@ package com.example.sunshineweather
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.TextureView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import com.example.sunshineweather.logic.dao.Repository
 import com.example.sunshineweather.logic.model.DailyWeather
 import com.example.sunshineweather.logic.model.RealTimeWeather
@@ -23,17 +26,25 @@ import java.util.*
 
 class WeatherActivity : AppCompatActivity() {
 
+    //硬编码
+    var city = "南昌"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_weather)
-        var city = intent.getStringExtra("city")
-        if(city==null || city.isEmpty())
-            city = getString(R.string.default_city)
-        WeatherViewModel.refRTDailyWea(city,{rtw->showRTWeather(rtw)},{ldw->showDailyWeather(ldw)})
+        val ct = intent.getStringExtra("city")
+        if(ct!=null)
+            city = ct
+        refreshData(city)
         swipe.setColorSchemeColors(resources.getColor(R.color.purple_200))
         swipe.setOnRefreshListener {
             WeatherViewModel.refRTDailyWea(city,{rtw->showRTWeather(rtw)},{ldw->showDailyWeather(ldw)})
         }
+    }
+
+    fun refreshData(city: String){
+        this.city = city
+        WeatherViewModel.refRTDailyWea(city,{rtw->showRTWeather(rtw)},{ldw->showDailyWeather(ldw)})
     }
 
     private fun showRTWeather(rtWeather: RealTimeWeather?){
@@ -63,5 +74,6 @@ class WeatherActivity : AppCompatActivity() {
             }
         }
         swipe.isRefreshing = false
+
     }
 }
