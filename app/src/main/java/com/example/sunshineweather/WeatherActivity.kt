@@ -1,16 +1,22 @@
 package com.example.sunshineweather
 
+import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.TextureView
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.sunshineweather.logic.dao.Repository
 import com.example.sunshineweather.logic.model.DailyWeather
@@ -19,6 +25,7 @@ import com.example.sunshineweather.ui.weather.WeatherViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_weather.*
 import kotlinx.android.synthetic.main.daily_weather.*
+import kotlinx.android.synthetic.main.header.*
 import kotlinx.android.synthetic.main.real_time_weather.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -29,17 +36,41 @@ class WeatherActivity : AppCompatActivity() {
     //硬编码
     var city = "南昌"
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= 21) {
+            window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            window.statusBarColor = Color.TRANSPARENT
+        }
         setContentView(R.layout.activity_weather)
-        val ct = intent.getStringExtra("city")
-        if(ct!=null)
-            city = ct
-        refreshData(city)
         swipe.setColorSchemeColors(resources.getColor(R.color.purple_200))
         swipe.setOnRefreshListener {
             WeatherViewModel.refRTDailyWea(city,{rtw->showRTWeather(rtw)},{ldw->showDailyWeather(ldw)})
         }
+        add_button.setOnClickListener {
+            Repository.saveCity(city)
+            Toast.makeText(this,"$city 添加成功", Toast.LENGTH_LONG).show()
+        }
+        search_button.setOnClickListener {
+            //可能导致重复创建多个相同的activity
+            val intent = Intent(this, CityActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val ct = intent.getStringExtra("city")
+        if(ct!=null)
+            city = ct
+        refreshData(city)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 
     fun refreshData(city: String){

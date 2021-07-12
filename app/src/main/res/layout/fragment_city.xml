@@ -3,13 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CityFragment">
+    tools:context=".CityFragment"
+    >
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/city_recycle_view"
         android:layout_width="match_parent"

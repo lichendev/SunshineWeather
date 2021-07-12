@@ -1,19 +1,22 @@
 package com.example.sunshineweather.logic.dao
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.sunshineweather.R
+import androidx.core.app.ActivityCompat
 import com.example.sunshineweather.SunnyWeatherApplication
 import com.example.sunshineweather.logic.model.DailyWeaResResult
 import com.example.sunshineweather.logic.model.DailyWeather
-import com.example.sunshineweather.logic.model.Location
+import com.example.sunshineweather.logic.model.CLocation
 import com.example.sunshineweather.logic.model.RealTimeWeather
 import com.example.sunshineweather.logic.network.CityNetwork
 import com.example.sunshineweather.logic.network.WeatherNetwork
 import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Response
 import java.io.*
+import java.util.*
 
 object Repository {
     private const val fileName = "real_time_weather.json"
@@ -45,12 +48,12 @@ object Repository {
         }
     }
 
-    fun getCityLocation(city: String, callback: (Location?)->Unit){
+    fun getCityLocation(city: String, callback: (CLocation?)->Unit){
         CityNetwork.getCityLocation(city){call,response->
             val cityResponseResult = response.body()
-            var location: Location? = null
+            var location: CLocation? = null
             if(cityResponseResult!=null && cityResponseResult.geocodes.size > 0)
-                location = Location.parseLocation(cityResponseResult.geocodes[0].location)
+                location = CLocation.parseLocation(cityResponseResult.geocodes[0].location)
             callback(location)
         }
     }
@@ -76,31 +79,72 @@ object Repository {
         bufferWriter.close()
     }
 
-    lateinit var cities:ArrayList<String>
+    lateinit var cities: LinkedList<String>
     //var city = SunnyWeatherApplication.context.getString(R.string.default_city)
 
-    fun saveCity(city: String){
+    fun saveCity(city: String?){
         if(!this::cities.isInitialized)
             cities = loadSavedCities()
-        if(!cities.contains(city)){
+        if(city!=null && !cities.contains(city)){
             cities.add(city)
-            val edit = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE).edit()
-            edit.putString("cities", gson.toJson(cities.toArray()))
-            edit.apply()
         }
+        val edit = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE).edit()
+        edit.putString("cities", gson.toJson(cities.toArray()))
+        edit.apply()
     }
 
-    fun loadSavedCities(): ArrayList<String>{
+    fun loadSavedCities(): LinkedList<String>{
         if(!this::cities.isInitialized){
             val csJson = SunnyWeatherApplication.context.getSharedPreferences("main",
                 Context.MODE_PRIVATE).getString("cities","")
             //ArrayList<String>::class.java
-            cities = ArrayList<String>()
+            cities = LinkedList<String>()
             if(csJson!=null && csJson.isNotEmpty())
                 cities.addAll(gson.fromJson(csJson, Array<String>::class.java))
         }
         return cities
     }
 
+    fun swapPositionCity(source: Int, target:Int): List<String>{
+        Collections.swap(cities,source,target)
+        saveCity(null)
+        return cities
+    }
+
+    fun removeCity(position: Int): List<String>{
+        cities.removeAt(position)
+        saveCity(null)
+        return cities
+    }
+
+    private fun getUpdateLocation(context: Context, callback: (android.location.Location)->Unit) {
+        //1.获取位置管理器
+        val locationManager =
+            context.getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager
+        //2.获取位置提供器，GPS或是NetWork
+        val providers: List<String> = locationManager.getProviders(true)
+        val locationProvider: String
+        if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+            //如果是网络定位
+            locationProvider = LocationManager.NETWORK_PROVIDER
+        } else if (providers.contains(LocationManager.GPS_PROVIDER)) {
+            //如果是GPS定位
+            locationProvider = LocationManager.GPS_PROVIDER
+        } else {
+            Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        //3.获取上次的位置，一般第一次运行，此值为null
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context, Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            locationManager.requestLocationUpdates(locationProvider, 0, 0f) {
+                callback(it)
+            }
+        }
+    }
 
 }
