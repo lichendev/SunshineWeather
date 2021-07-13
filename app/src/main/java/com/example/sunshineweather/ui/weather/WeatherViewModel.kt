@@ -2,7 +2,9 @@ package com.example.sunshineweather.ui.weather
 
 import android.util.Log
 import com.example.sunshineweather.R
+import com.example.sunshineweather.SunnyWeatherApplication
 import com.example.sunshineweather.logic.dao.Repository
+import com.example.sunshineweather.logic.model.CLocation
 import com.example.sunshineweather.logic.model.DailyWeather
 import com.example.sunshineweather.logic.model.RealTimeWeather
 import com.example.sunshineweather.logic.network.CityNetwork
@@ -62,7 +64,7 @@ object WeatherViewModel {
 
     fun refreshRTWeather(city:String, callback: (RealTimeWeather?)->Unit){
         Repository.getCityLocation(city) {
-            queryCity = city
+            //queryCity = city
             if(it!=null){
                  Repository.refreshRTWeather(it.longitude,it.latitude,callback)
             }else{
@@ -73,7 +75,7 @@ object WeatherViewModel {
 
     fun refreshDailyWeather(city: String, callback: (List<DailyWeather>?) -> Unit){
         Repository.getCityLocation(city) {
-            queryCity = city
+            //queryCity = city
             if(it!=null){
                 Repository.refreshDailyWeather(it.longitude,it.latitude,callback)
             }else{
@@ -85,7 +87,7 @@ object WeatherViewModel {
     fun refRTDailyWea(city:String, callbackRT: (RealTimeWeather?)->Unit,
                               callbackDaily: (List<DailyWeather>?) -> Unit){
         Repository.getCityLocation(city) {
-            queryCity = city
+            //queryCity = city
             if(it!=null){
                 Repository.refreshRTWeather(it.longitude,it.latitude,callbackRT)
                 Repository.refreshDailyWeather(it.longitude,it.latitude,callbackDaily)
@@ -96,5 +98,25 @@ object WeatherViewModel {
         }
     }
 
-    var queryCity:String = "抚州"
+    fun refLocalWeather(callbackCity: (String) -> Unit,callbackRT: (RealTimeWeather?)->Unit,
+                        callbackDaily: (List<DailyWeather>?) -> Unit){
+        Repository.getUpdateLocation(SunnyWeatherApplication.context){
+            val locationC = CLocation.convertToCLocation(it)
+            Repository.refreshRTWeather(locationC.longitude,locationC.latitude,callbackRT)
+            Repository.refreshDailyWeather(locationC.longitude,locationC.latitude,callbackDaily)
+            Repository.getCityName(locationC){
+                if(it == null){
+                    callbackCity(locationC.toString())
+                }else{
+                    callbackCity(it)
+                }
+            }
+        }
+    }
+
+    //var queryCity:String = "抚州"
+
+    fun removeLocationUpdates(){
+        Repository.removeLocationUpdates()
+    }
 }

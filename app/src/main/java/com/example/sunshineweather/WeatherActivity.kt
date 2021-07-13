@@ -1,10 +1,13 @@
 package com.example.sunshineweather
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.TextureView
@@ -13,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -22,7 +26,6 @@ import com.example.sunshineweather.logic.dao.Repository
 import com.example.sunshineweather.logic.model.DailyWeather
 import com.example.sunshineweather.logic.model.RealTimeWeather
 import com.example.sunshineweather.ui.weather.WeatherViewModel
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_weather.*
 import kotlinx.android.synthetic.main.daily_weather.*
 import kotlinx.android.synthetic.main.header.*
@@ -34,7 +37,7 @@ import java.util.*
 class WeatherActivity : AppCompatActivity() {
 
     //硬编码
-    var city = "南昌"
+    lateinit var city: String
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +50,8 @@ class WeatherActivity : AppCompatActivity() {
         setContentView(R.layout.activity_weather)
         swipe.setColorSchemeColors(resources.getColor(R.color.purple_200))
         swipe.setOnRefreshListener {
-            WeatherViewModel.refRTDailyWea(city,{rtw->showRTWeather(rtw)},{ldw->showDailyWeather(ldw)})
+            //此时经纬度已经知道，再去请求浪费时间
+            refreshData(city)
         }
         add_button.setOnClickListener {
             Repository.saveCity(city)
@@ -58,14 +62,30 @@ class WeatherActivity : AppCompatActivity() {
             val intent = Intent(this, CityActivity::class.java)
             startActivity(intent)
         }
+        location_button.setOnClickListener {
+            if(checkLocationPermission()){
+                WeatherViewModel.refLocalWeather({showCityName(it)},{showRTWeather(it)},{showDailyWeather(it)})
+            }
+        }
+
     }
 
     override fun onResume() {
         super.onResume()
         val ct = intent.getStringExtra("city")
-        if(ct!=null)
-            city = ct
-        refreshData(city)
+        if(ct!=null) {
+            //清除位置更新监听器
+            if(this::city.isInitialized && !ct.equals(city))
+                WeatherViewModel.removeLocationUpdates()
+            refreshData(ct)
+        }else if(this::city.isInitialized){
+            refreshData(city)
+        }else{
+            //默认显示定位地址的天气信息
+            if(checkLocationPermission()){
+                WeatherViewModel.refLocalWeather({showCityName(it)},{showRTWeather(it)},{showDailyWeather(it)})
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -75,12 +95,13 @@ class WeatherActivity : AppCompatActivity() {
 
     fun refreshData(city: String){
         this.city = city
-        WeatherViewModel.refRTDailyWea(city,{rtw->showRTWeather(rtw)},{ldw->showDailyWeather(ldw)})
+        WeatherViewModel.refRTDailyWea(city,{rtw->
+            showCityName(city)
+            showRTWeather(rtw)},{ldw->showDailyWeather(ldw)})
     }
 
     private fun showRTWeather(rtWeather: RealTimeWeather?){
         if(rtWeather!=null){
-            city_text.text = WeatherViewModel.queryCity
             tempe_text.text = rtWeather.temperature.toDouble().toInt().toString()
             weath_text.text = WeatherViewModel.convertCodeToChinese(rtWeather.skycon)
             if(rtWeather.air_quality!=null)
@@ -105,6 +126,42 @@ class WeatherActivity : AppCompatActivity() {
             }
         }
         swipe.isRefreshing = false
+    }
 
+    private fun showCityName(city: String){
+        this.city = city
+        city_text.text = city
+        Log.d("city","$city")
+    }
+
+    //检查定位权限
+    private fun checkLocationPermission(): Boolean{
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION),1)
+            return false
+        }else{
+            return true
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when(requestCode){
+            1->{
+                if(grantResults.size > 1 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED){
+                    WeatherViewModel.refLocalWeather({showCityName(it)},{showRTWeather(it)},{showDailyWeather(it)})
+                }
+            }
+        }
     }
 }

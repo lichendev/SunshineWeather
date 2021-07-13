@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sunshineweather.logic.dao.Repository
 import kotlinx.android.synthetic.main.activity_city.*
-import kotlinx.android.synthetic.main.activity_main.*
 
 class CityActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

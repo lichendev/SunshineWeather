@@ -1,4 +1,5 @@
 package com.example.sunshineweather.logic.model
 
-class LonLatResponseResult {
+data class LonLatResponseResult (val status: String,val regeocode: Regeocode){
+    data class Regeocode(val formatted_address: String)
 }

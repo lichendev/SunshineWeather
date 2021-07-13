@@ -18,4 +18,7 @@ object CityViewModel {
     fun removeCity(position: Int): List<String>{
         return Repository.removeCity(position)
     }
+
+
+
 }

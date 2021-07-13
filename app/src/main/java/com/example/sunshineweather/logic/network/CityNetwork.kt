@@ -1,7 +1,9 @@
 package com.example.sunshineweather.logic.network
 
 import com.example.sunshineweather.SunnyWeatherApplication
+import com.example.sunshineweather.logic.model.CLocation
 import com.example.sunshineweather.logic.model.CityResponseResult
+import com.example.sunshineweather.logic.model.LonLatResponseResult
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,5 +33,23 @@ object CityNetwork {
                 }
             }
         )
+    }
+
+    fun getCityName(location: CLocation, callbackL: (Call<LonLatResponseResult>, Response<LonLatResponseResult>) -> Unit){
+        cityService.getCityName(SunnyWeatherApplication.CityTOKEN,location.toString()).enqueue(
+            object : Callback<LonLatResponseResult> {
+                override fun onResponse(
+                    call: Call<LonLatResponseResult>,
+                    response: Response<LonLatResponseResult>
+                ) {
+                    callbackL(call,response)
+                }
+
+                override fun onFailure(call: Call<LonLatResponseResult>, t: Throwable) {
+                    t.printStackTrace()
+                }
+            }
+        )
+
     }
 }

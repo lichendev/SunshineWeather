@@ -1,8 +1,10 @@
 package com.example.sunshineweather.logic.dao
 
 import android.Manifest
+import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.location.LocationManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +59,17 @@ object Repository {
             callback(location)
         }
     }
+
+    fun getCityName(location: CLocation, callback: (String?)->Unit){
+        CityNetwork.getCityName(location){call,response->
+            val lonLatResponseResult = response.body()
+            var city: String? = null
+            if(lonLatResponseResult!=null)
+                city = lonLatResponseResult.regeocode.formatted_address
+            callback(city)
+        }
+    }
+
 
     private fun loadRTWeatherFromNative(): RealTimeWeather{
         val context = SunnyWeatherApplication.context
@@ -117,33 +130,51 @@ object Repository {
         return cities
     }
 
-    private fun getUpdateLocation(context: Context, callback: (android.location.Location)->Unit) {
-        //1.获取位置管理器
-        val locationManager =
-            context.getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager
-        //2.获取位置提供器，GPS或是NetWork
-        val providers: List<String> = locationManager.getProviders(true)
-        val locationProvider: String
-        if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
-            //如果是网络定位
-            locationProvider = LocationManager.NETWORK_PROVIDER
-        } else if (providers.contains(LocationManager.GPS_PROVIDER)) {
-            //如果是GPS定位
-            locationProvider = LocationManager.GPS_PROVIDER
-        } else {
-            Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show()
-            return
-        }
+    lateinit var locationManager: LocationManager
+    lateinit var locationProvider:String
+    var locationUpdateCallback: ((Location)->Unit) ?= null
+     fun getUpdateLocation(context: Context, callback: (android.location.Location)->Unit) {
+         if(!this::locationManager.isInitialized){
+             //1.获取位置管理器
+             locationManager =
+                 context.getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager
+             //2.获取位置提供器，GPS或是NetWork
+             val providers: List<String> = locationManager.getProviders(true)
+             if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                 //如果是网络定位
+                 locationProvider = LocationManager.NETWORK_PROVIDER
+             } else if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                 //如果是GPS定位
+                 locationProvider = LocationManager.GPS_PROVIDER
+             } else {
+                 Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show()
+                 return
+             }
+         }
 
         //3.获取上次的位置，一般第一次运行，此值为null
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 context, Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
-            locationManager.requestLocationUpdates(locationProvider, 0, 0f) {
+            if(locationUpdateCallback != null){
+                locationManager.removeUpdates(locationUpdateCallback!!)
+                locationUpdateCallback = null
+            }
+            locationUpdateCallback={
                 callback(it)
             }
+            locationManager.requestLocationUpdates(locationProvider, 1000000, 1000f,
+                locationUpdateCallback!!
+            )
+        }
+    }
+
+    fun removeLocationUpdates(){
+        if(locationUpdateCallback != null){
+            locationManager.removeUpdates(locationUpdateCallback!!)
+            locationUpdateCallback = null
         }
     }
 
