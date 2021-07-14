@@ -2,8 +2,8 @@ package com.example.sunshineweather.logic.model
 
 data class DailyWeaResResult(val status: String, val result: DResult) {
     data class DResult(val daily: Dailys)
-    data class Dailys(val status: String, val astro: Array<Astro>, val skycon: Array<Skycon>,
-                      val temperature: Array<Temperature>)
+    data class Dailys(val status: String, val astro: List<Astro>, val skycon: List<Skycon>,
+                      val temperature: List<Temperature>)
     data class Astro(val date:String, val sunrise:SunriseSet, val sunset:SunriseSet)
     data class Skycon(val date: String, val value:String)
     data class Temperature(val date:String, val avg:String, val max:String, val min:String)

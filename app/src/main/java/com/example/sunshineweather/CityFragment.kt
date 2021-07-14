@@ -1,34 +1,22 @@
 package com.example.sunshineweather
 
-import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.*
-import android.widget.Button
 import androidx.fragment.app.Fragment
-import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.sunshineweather.logic.dao.Repository
+import com.example.sunshineweather.ui.place.CityAdapter
+import com.example.sunshineweather.ui.place.CityItemTouchCallback
+import com.example.sunshineweather.ui.weather.WeatherViewModel
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [CityFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class CityFragment : Fragment() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,21 +27,26 @@ class CityFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         //val test1 = Repository.loadSavedCities()
         val adapter = CityAdapter(requireContext()){
-            if(activity!=null){
+            activity?.let{act->
                 if(activity is WeatherActivity){
                     val wActivity = activity as WeatherActivity
                     wActivity.findViewById<DrawerLayout>(R.id.drawer_layout).closeDrawer(GravityCompat.START)
                     wActivity.refreshData(it.text.toString())
                 }else{
-                    val intent = Intent(SunnyWeatherApplication.context,WeatherActivity::class.java)
+                    val intent = Intent()
                     intent.putExtra("city",it.text.toString())
-                    (activity as FragmentActivity).startActivity(intent)
+                    act.setResult(WeatherViewModel.CITY_NAME_BACK, intent)
+                    act.finish()
                 }
             }
-
         }
         recyclerView.adapter = adapter
         ItemTouchHelper(CityItemTouchCallback(adapter)).attachToRecyclerView(recyclerView)
+        recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration(){
+            override fun getItemOffsets(outRect: Rect, itemPosition: Int, parent: RecyclerView) {
+                outRect.bottom = 32
+            }
+        })
         return view
     }
 }

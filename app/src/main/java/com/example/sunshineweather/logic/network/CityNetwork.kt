@@ -4,6 +4,7 @@ import com.example.sunshineweather.SunnyWeatherApplication
 import com.example.sunshineweather.logic.model.CLocation
 import com.example.sunshineweather.logic.model.CityResponseResult
 import com.example.sunshineweather.logic.model.LonLatResponseResult
+import com.example.sunshineweather.logic.model.POIResponseResult
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -50,6 +51,24 @@ object CityNetwork {
                 }
             }
         )
+    }
 
+    fun getPOI(keyword:String, city: String,
+               callback: (Call<POIResponseResult>, Response<POIResponseResult>) -> Unit){
+        cityService.getPOI(SunnyWeatherApplication.CityTOKEN,keyword,city,SunnyWeatherApplication.POI_TYPES).enqueue(
+            object : Callback<POIResponseResult>{
+                override fun onResponse(
+                    call: Call<POIResponseResult>,
+                    response: Response<POIResponseResult>
+                ) {
+                    callback(call,response)
+                }
+
+                override fun onFailure(call: Call<POIResponseResult>, t: Throwable) {
+                    t.printStackTrace()
+                }
+
+            }
+        )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.sunshineweather
+package com.example.sunshineweather.ui.place
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,18 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sunshineweather.R
 import com.example.sunshineweather.ui.weather.CityViewModel
 
 class CityAdapter(val context: Context,
-                  val callback: (TextView)->Unit) : RecyclerView.Adapter<CityAdapter.ViewHolder>(),
-                    ItemMoveSwipeCallback{
+                  private val callback: (TextView)->Unit) : RecyclerView.Adapter<CityAdapter.ViewHolder>(),
+    ItemMoveSwipeCallback {
 
-    var data: List<String> = CityViewModel.getCities()
+    private var data: List<String> = CityViewModel.getCities()
 
     class ViewHolder(view: View, val callback: (TextView)->Unit) : RecyclerView.ViewHolder(view){
-        val city_text = view.findViewById<TextView>(R.id.city_recycle_item)
+        val cityText: TextView = view.findViewById(R.id.city_recycle_item)
         init {
-            city_text.setOnClickListener {
+            cityText.setOnClickListener {
                 val textV = it as TextView
                 callback(textV)
             }
@@ -30,7 +31,7 @@ class CityAdapter(val context: Context,
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.city_text.text = data[position]
+        holder.cityText.text = data[position]
     }
 
     override fun getItemCount(): Int {

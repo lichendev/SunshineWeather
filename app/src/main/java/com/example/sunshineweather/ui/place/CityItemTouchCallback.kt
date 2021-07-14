@@ -1,10 +1,9 @@
-package com.example.sunshineweather
+package com.example.sunshineweather.ui.place
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import java.text.FieldPosition
 
-class CityItemTouchCallback(val itemMoveSwipeCallback: ItemMoveSwipeCallback): ItemTouchHelper.Callback() {
+class CityItemTouchCallback(private val itemMoveSwipeCallback: ItemMoveSwipeCallback): ItemTouchHelper.Callback() {
 
     override fun getMovementFlags(
         recyclerView: RecyclerView,

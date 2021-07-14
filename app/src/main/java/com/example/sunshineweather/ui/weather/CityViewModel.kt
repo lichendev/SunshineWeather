@@ -1,6 +1,7 @@
 package com.example.sunshineweather.ui.weather
 
 import com.example.sunshineweather.logic.dao.Repository
+import com.example.sunshineweather.logic.model.POIResponseResult
 
 object CityViewModel {
     fun getCities():List<String>{
@@ -19,6 +20,8 @@ object CityViewModel {
         return Repository.removeCity(position)
     }
 
-
+    fun getPOI(keyword:String, callback: (List<POIResponseResult.POI>?)->Unit){
+        Repository.getPOI(keyword, Repository.getLocalCity(),callback)
+    }
 
 }

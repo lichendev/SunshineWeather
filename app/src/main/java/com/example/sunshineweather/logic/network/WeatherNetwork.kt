@@ -34,12 +34,12 @@ object WeatherNetwork {
         )
     }
 
-    fun getRealTimeWeather(longitude: Double, latitude: Double): RTWeaResResult? {
-        val response =
-            weatherService.getRealTimeWeather(SunnyWeatherApplication.WeatherTOKEN, longitude, latitude)
-                .execute()
-        return response.body()
-    }
+//    fun getRealTimeWeather(longitude: Double, latitude: Double): RTWeaResResult? {
+//        val response =
+//            weatherService.getRealTimeWeather(SunnyWeatherApplication.WeatherTOKEN, longitude, latitude)
+//                .execute()
+//        return response.body()
+//    }
 
     fun getDailyWeather(longitude: Double, latitude: Double, callback:
         (Call<DailyWeaResResult>, Response<DailyWeaResResult>)->Unit){

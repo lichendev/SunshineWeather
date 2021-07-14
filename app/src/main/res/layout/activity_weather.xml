@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".WeatherActivity"
     android:id="@+id/drawer_layout">
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe"
         android:layout_width="match_parent"
@@ -33,6 +34,7 @@
                     layout="@layout/daily_weather"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/real_time_weather" />

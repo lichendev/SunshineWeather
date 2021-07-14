@@ -26,7 +26,7 @@ data class RealTimeWeather(val status: String, val temperature: String, val appa
     data class AirQuality(val pm25: String, val pm10: String, val o3: String, val so2:String, val no2:String,
     val co:String, val aqi:AQI){
         data class AQI(val chn:String, val usa:String)
-        data class Description(val usa: String, val chn:String)
+        //data class Description(val usa: String, val chn:String)
     }
 
     data class LifeIndex(val ultraviolet: Ultraviolet, val comfort: Comfort){

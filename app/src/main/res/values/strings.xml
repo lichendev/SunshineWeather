@@ -2,10 +2,11 @@
     <string name="app_name">SunshineWeather</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="celsius">\u2103</string>
+    <string name="temperature_ces">%s\u2103</string>
+    <string name="tem_scope_ces">%1$s~%2$s\u2103</string>
     <string name="default_city">南昌</string>
     <string name="query_weather">查询天气</string>
-    <string name="aqi">空气指数</string>
+    <string name="aqi">空气指数%s</string>
     <string name="none">none</string>
     <string name="daily_weather_title">预报</string>
 </resources>

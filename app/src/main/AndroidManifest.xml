@@ -17,11 +17,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SunshineWeather">
-        <activity android:name=".CityActivity"
-            android:launchMode="singleTask">
+        <activity android:name=".CityActivity">
         </activity>
-        <activity android:name=".WeatherActivity"
-            android:launchMode="singleTask">
+        <activity android:name=".WeatherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

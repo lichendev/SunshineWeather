@@ -1,19 +1,17 @@
 package com.example.sunshineweather.logic.dao
 
 import android.Manifest
-import android.app.admin.DevicePolicyManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.sunshineweather.R
 import com.example.sunshineweather.SunnyWeatherApplication
-import com.example.sunshineweather.logic.model.DailyWeaResResult
-import com.example.sunshineweather.logic.model.DailyWeather
-import com.example.sunshineweather.logic.model.CLocation
-import com.example.sunshineweather.logic.model.RealTimeWeather
+import com.example.sunshineweather.logic.model.*
 import com.example.sunshineweather.logic.network.CityNetwork
 import com.example.sunshineweather.logic.network.WeatherNetwork
 import com.google.gson.Gson
@@ -26,9 +24,10 @@ object Repository {
     fun refreshRTWeather(longitude: Double, latitude: Double, callback: (RealTimeWeather?)->Unit): RealTimeWeather{
         val rtWeather = loadRTWeatherFromNative()
         //loadRTWeatherFromNetwork
-        WeatherNetwork.getRealTimeWeather(longitude, latitude){call, response->
+        WeatherNetwork.getRealTimeWeather(longitude, latitude){_, response->
             val requestResult = response.body()
-            if (requestResult!=null && requestResult.result!= null && requestResult.result.realtime!=null){
+            if (requestResult?.result?.realtime != null){
+//            if (requestResult!=null && requestResult.result!= null && requestResult.result.realtime!=null){
                 callback(requestResult.result.realtime)
                 saveRTWeatherToNative(requestResult.result.realtime)
             }else{
@@ -39,7 +38,7 @@ object Repository {
     }
 
     fun refreshDailyWeather(longitude: Double, latitude: Double, callback: (List<DailyWeather>?)->Unit){
-        WeatherNetwork.getDailyWeather(longitude,latitude){call, response ->
+        WeatherNetwork.getDailyWeather(longitude,latitude){_, response ->
             val result = response.body()
             if(result!=null){
                 val list = DailyWeaResResult.convertToDailyWeather(result)
@@ -50,22 +49,27 @@ object Repository {
         }
     }
 
-    fun getCityLocation(city: String, callback: (CLocation?)->Unit){
-        CityNetwork.getCityLocation(city){call,response->
+    fun getCityLocation(city: String, callbackL: (CLocation?)->Unit, callbackCity: (String?) -> Unit){
+        CityNetwork.getCityLocation(city){_,response->
             val cityResponseResult = response.body()
             var location: CLocation? = null
-            if(cityResponseResult!=null && cityResponseResult.geocodes.size > 0)
+            var formatCity: String? = null
+            if(cityResponseResult!=null && cityResponseResult.geocodes.isNotEmpty()) {
                 location = CLocation.parseLocation(cityResponseResult.geocodes[0].location)
-            callback(location)
+                formatCity = cityResponseResult.geocodes[0].formatted_address
+            }
+            callbackL(location)
+            callbackCity(formatCity)
         }
     }
 
     fun getCityName(location: CLocation, callback: (String?)->Unit){
-        CityNetwork.getCityName(location){call,response->
+        CityNetwork.getCityName(location){_,response->
             val lonLatResponseResult = response.body()
             var city: String? = null
-            if(lonLatResponseResult!=null)
+            if(lonLatResponseResult!=null) {
                 city = lonLatResponseResult.regeocode.formatted_address
+            }
             callback(city)
         }
     }
@@ -92,7 +96,8 @@ object Repository {
         bufferWriter.close()
     }
 
-    lateinit var cities: LinkedList<String>
+    private lateinit var cities: LinkedList<String>
+    private lateinit var sharedPreferences: SharedPreferences
     //var city = SunnyWeatherApplication.context.getString(R.string.default_city)
 
     fun saveCity(city: String?){
@@ -101,15 +106,18 @@ object Repository {
         if(city!=null && !cities.contains(city)){
             cities.add(city)
         }
-        val edit = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE).edit()
+        if(!this::sharedPreferences.isInitialized)
+            sharedPreferences = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE)
+        val edit = sharedPreferences.edit()
         edit.putString("cities", gson.toJson(cities.toArray()))
         edit.apply()
     }
 
     fun loadSavedCities(): LinkedList<String>{
+        if(!this::sharedPreferences.isInitialized)
+            sharedPreferences = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE)
         if(!this::cities.isInitialized){
-            val csJson = SunnyWeatherApplication.context.getSharedPreferences("main",
-                Context.MODE_PRIVATE).getString("cities","")
+            val csJson = sharedPreferences.getString("cities","")
             //ArrayList<String>::class.java
             cities = LinkedList<String>()
             if(csJson!=null && csJson.isNotEmpty())
@@ -130,25 +138,29 @@ object Repository {
         return cities
     }
 
-    lateinit var locationManager: LocationManager
-    lateinit var locationProvider:String
-    var locationUpdateCallback: ((Location)->Unit) ?= null
-     fun getUpdateLocation(context: Context, callback: (android.location.Location)->Unit) {
+    private lateinit var locationManager: LocationManager
+    private lateinit var locationProvider:String
+    private var locationUpdateCallback: ((Location)->Unit) ?= null
+     fun getUpdateLocation(context: Context, callback: (Location)->Unit) {
          if(!this::locationManager.isInitialized){
              //1.获取位置管理器
              locationManager =
                  context.getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager
              //2.获取位置提供器，GPS或是NetWork
              val providers: List<String> = locationManager.getProviders(true)
-             if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
-                 //如果是网络定位
-                 locationProvider = LocationManager.NETWORK_PROVIDER
-             } else if (providers.contains(LocationManager.GPS_PROVIDER)) {
-                 //如果是GPS定位
-                 locationProvider = LocationManager.GPS_PROVIDER
-             } else {
-                 Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show()
-                 return
+             locationProvider = when {
+                 providers.contains(LocationManager.NETWORK_PROVIDER) -> {
+                     //如果是网络定位
+                     LocationManager.NETWORK_PROVIDER
+                 }
+                 providers.contains(LocationManager.GPS_PROVIDER) -> {
+                     //如果是GPS定位
+                     LocationManager.GPS_PROVIDER
+                 }
+                 else -> {
+                     Toast.makeText(context, "没有可用的位置提供器", Toast.LENGTH_SHORT).show()
+                     return
+                 }
              }
          }
 
@@ -158,24 +170,78 @@ object Repository {
                 context, Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            if(locationUpdateCallback != null){
-                locationManager.removeUpdates(locationUpdateCallback!!)
-                locationUpdateCallback = null
-            }
+            removeLocationUpdates()
             locationUpdateCallback={
                 callback(it)
             }
-            locationManager.requestLocationUpdates(locationProvider, 1000000, 1000f,
-                locationUpdateCallback!!
-            )
+            locationUpdateCallback?.let {
+                locationManager.requestLocationUpdates(locationProvider, 1000000, 1000f,
+                   it
+                )
+            }
         }
     }
 
     fun removeLocationUpdates(){
-        if(locationUpdateCallback != null){
-            locationManager.removeUpdates(locationUpdateCallback!!)
-            locationUpdateCallback = null
+        locationUpdateCallback?.let {
+            locationManager.removeUpdates(it)
+        }
+        locationUpdateCallback = null
+    }
+
+    fun getPOI(keyword:String, city: String?,
+               callback: (List<POIResponseResult.POI>?) -> Unit){
+        if(city==null){
+            CityNetwork.getPOI(keyword,""){ _, response ->
+                val pois = response.body()?.pois
+                callback(pois)
+            }
+        }else{
+            CityNetwork.getPOI(keyword,city){_, response ->
+                val pois = response.body()?.pois
+                callback(pois)
+            }
+        }
+
+    }
+
+    /**
+     * 获取WeatherActivity最近显示的city
+     */
+    fun getLatestCity(): String{
+        if(!this::sharedPreferences.isInitialized)
+            sharedPreferences = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE)
+        val value = sharedPreferences.getString("latestCity",null)
+        return value?:SunnyWeatherApplication.context.getString(R.string.default_city)
+    }
+
+    /**
+     * 存储WeatherActivity最近显示的city
+     */
+    fun saveLatestCity(city: String){
+        if(!this::sharedPreferences.isInitialized)
+            sharedPreferences = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE)
+        if (city.isNotEmpty()){
+            val edit = sharedPreferences.edit()
+            edit.putString("latestCity", city)
+            edit.apply()
         }
     }
 
+    fun getLocalCity():String{
+        if(!this::sharedPreferences.isInitialized)
+            sharedPreferences = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE)
+        val value = sharedPreferences.getString("localCity",null)
+        return value?:SunnyWeatherApplication.context.getString(R.string.default_city)
+    }
+
+    fun saveLocalCity(city:String){
+        if(!this::sharedPreferences.isInitialized)
+            sharedPreferences = SunnyWeatherApplication.context.getSharedPreferences("main", Context.MODE_PRIVATE)
+        if (city.isNotEmpty()){
+            val edit = sharedPreferences.edit()
+            edit.putString("localCity", city)
+            edit.apply()
+        }
+    }
 }

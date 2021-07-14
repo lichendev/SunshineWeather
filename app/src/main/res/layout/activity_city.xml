@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CityActivity">
+    tools:context=".CityActivity"
+    android:id="@+id/city_root">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -15,10 +16,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/input_city"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:completionThreshold="2"
             android:layout_weight="1" />
 
         <Button
