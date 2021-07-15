@@ -63,19 +63,24 @@ class WeatherActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val ct = intent.getStringExtra("city")
-        if(ct!=null) {
-            //清除位置更新监听器
-            if(this::city.isInitialized && ct != city)
-                WeatherViewModel.removeLocationUpdates()
-            refreshData(ct)
-        }else if(this::city.isInitialized){
-            refreshData(city)
-        }else{
-            //默认显示定位地址的天气信息
-            if(checkLocationPermission()){
-                WeatherViewModel.refLocalWeather({showCityName(it)},{showRTWeather(it)},{showDailyWeather(it)})
-            }else{
-                refreshData(WeatherViewModel.getLatestCity())
+        intent.putExtra("city","")
+        when{
+            ct?.isNotEmpty() == true ->{
+                //清除位置更新监听器
+                if(this::city.isInitialized && ct != city)
+                    WeatherViewModel.removeLocationUpdates()
+                refreshData(ct)
+            }
+            this::city.isInitialized -> {
+                refreshData(city)
+            }
+            else -> {
+                //默认显示定位地址的天气信息
+                if(checkLocationPermission()){
+                    WeatherViewModel.refLocalWeather({showCityName(it)},{showRTWeather(it)},{showDailyWeather(it)})
+                }else{
+                    refreshData(WeatherViewModel.getLatestCity())
+                }
             }
         }
     }
